@@ -1,0 +1,13 @@
+This is a mirror of http://www.vim.org/scripts/script.php?script_id=5204
+
+GitHub: https://github.com/zenbro/mirror.vim
+Live demo: https://asciinema.org/a/22407
+
+If some of your projects have multiple environments (e.g. development, staging, production - with nearly the same directory and files structure), then there is a situations when you need to connect to one of this environments via ssh and remotely edit project-related files. Usually you will do something like this:
+
+ssh user@host
+cd path/to/you/project
+vim /some/file
+and so on...
+
+This plugin was created to simplify this process by maintaining special configuration file and adding different commands for quickly doing remote actions for each environment of project you working with.
