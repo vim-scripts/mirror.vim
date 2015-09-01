@@ -111,7 +111,7 @@ endfunction
 " Extract host, port and path from remote_path
 function! s:ParseRemotePath(remote_path)
   " scp://host:port/path
-  let m = matchlist(a:remote_path,'^scp://\(.\{-}\):\?\(\d\+\)\?/\(.\+\)$')
+  let m = matchlist(a:remote_path, '^scp://\(.\{-}\)\%(:\(\d\+\)\)\?/\(.\+\)$')
   let host = m[1]
   let port = m[2]
   let path = m[3]
@@ -162,6 +162,7 @@ function! s:OpenFile(env, command)
   let [local_path, remote_path] = s:FindPaths(a:env)
   let full_path = remote_path . local_path
   execute ':' . a:command full_path
+  redraw!
 endfunction
 
 " Find buffer that starts with 'scp://' and delete it
@@ -171,8 +172,9 @@ endfunction
 
 " Open diff with remote file for given env
 function! s:OpenDiff(env, command)
+  diffthis
   call s:OpenFile(a:env, a:command)
-  windo diffthis
+  diffthis
 endfunction
 
 " Open remote project directory for given env
@@ -231,7 +233,11 @@ function! s:SSHConnection(env)
     let ssh_command .= printf(" -t 'cd %s && %s'", path, g:mirror#ssh_shell)
   endif
   " example: ssh -p 23 user@host -t 'cd my_project && $SHELL --login'
-  execute '!' . ssh_command
+  if has('nvim')
+    execute 'terminal ' . ssh_command
+  else
+    execute '!' . ssh_command
+  endif
 endfunction
 
 " Get information about remote file by executing ls -lh
@@ -316,14 +322,14 @@ function! mirror#Do(env, type, command)
   if !empty(env)
     if a:type ==# 'file'
       call s:OpenFile(env, a:command)
+    elseif a:type ==# 'diff'
+      call s:OpenDiff(env, a:command)
     elseif a:type ==# 'project_dir'
       call s:OpenProjectDir(env, a:command)
     elseif a:type ==# 'parent_dir'
       call s:OpenParentDir(env, a:command)
     elseif a:type ==# 'root_dir'
       call s:OpenRootDir(env, a:command)
-    elseif a:type ==# 'diff'
-      call s:OpenDiff(env, a:command)
     elseif a:type ==# 'push'
       call s:PushFile(env)
     elseif a:type ==# 'pull'
